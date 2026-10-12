@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://d14a00577tgrc"]
+
+[ext_resource type="Script" uid="uid://v1u7b68x6ca2" path="res://player.gd" id="1_nx0hy"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_owv24"]
+size = Vector3(20, 0.5, 20)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_owv24"]
+size = Vector3(20, 0.5, 20)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_211fk"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_owv24"]
+material = SubResource("StandardMaterial3D_211fk")
+radius = 0.4
+height = 1.8
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_owv24"]
+
+[node name="TrainingGround" type="Node3D" unique_id=922134510]
+top_level = true
+
+[node name="Ground" type="MeshInstance3D" parent="." unique_id=760409473]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.02165556, -0.24999952, -0.024353266)
+lod_bias = 0.001
+mesh = SubResource("BoxMesh_owv24")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Ground" unique_id=570738625]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground/StaticBody3D" unique_id=1344283241]
+shape = SubResource("BoxShape3D_owv24")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1142772090]
+transform = Transform3D(0.8660254, 0.35355338, -0.35355338, 0, 0.70710677, 0.70710677, 0.5, -0.6123724, 0.6123724, 0, 0, 0)
+
+[node name="Player" type="CharacterBody3D" parent="." unique_id=2117903046]
+script = ExtResource("1_nx0hy")
+
+[node name="BodyMesh" type="MeshInstance3D" parent="Player" unique_id=1578118667]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CapsuleMesh_owv24")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player" unique_id=814017646]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_owv24")
+
+[node name="CameraPivot" type="Node3D" parent="Player" unique_id=1481718883]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+
+[node name="MainCamera" type="Camera3D" parent="Player/CameraPivot" unique_id=1607001589]
+transform = Transform3D(1, 0, 0, 0, 0.9659258, 0.25881904, 0, -0.25881904, 0.9659258, 0, 2, 6)
