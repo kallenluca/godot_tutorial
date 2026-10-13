@@ -79,7 +79,7 @@ func _physics_process(delta: float) -> void:
 
 		anim_player.rotation.y = lerp_angle(
 			anim_player.rotation.y,
-			target_angle,
+			target_angle+135,
 			min(turn_speed * delta, 1.0)
 		)
 
