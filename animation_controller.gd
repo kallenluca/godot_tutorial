@@ -6,7 +6,7 @@ extends Node3D
 @export var idle_animation: StringName = &"Idle"
 @export var walk_animation: StringName = &"Walk"
 @export var run_animation: StringName = &"Sprint"
-@export var jump_start_animation: StringName = &"Jump_start"
+@export var jump_start_animation: StringName = &"Jump_Start"
 @export var jump_animation: StringName = &"Jump"
 @export var jump_land_animation: StringName = &"Jump_Land"
 @export var run_threshold: float = 4
@@ -103,4 +103,4 @@ func _on_animation_finished(animation_name: StringName) -> void:
 
 	elif animation_name == jump_animation:
 		jump_state = &""
-		current_animation = &""
+		current_animation = &"Idle"
