@@ -76,10 +76,15 @@ func play_animation(animation_name: StringName) -> void:
 	if current_animation == animation_name:
 		return
 
-	if animation_player.has_animation(animation_name):
-		animation_player.play(animation_name)
-		current_animation = animation_name
+	if not animation_player.has_animation(animation_name):
+		push_warning(
+			"Animation not found: " + str(animation_name)
+		)
+		return
 
+	print("Playing animation: ", animation_name)
+	animation_player.play(animation_name)
+	current_animation = animation_name
 
 func _on_animation_finished(animation_name: StringName) -> void:
 	if animation_name == jump_start_animation:

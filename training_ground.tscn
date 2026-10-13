@@ -133,5 +133,12 @@ bones/52/rotation = Quaternion(-0.00013717555, 0.9643068, -0.26478708, -0.000499
 script = ExtResource("3_lvhi1")
 character = NodePath("..")
 animation_player = NodePath("../AnimationPlayer/AnimationPlayer")
+idle_animation = null
+walk_animation = null
+run_animation = null
+jump_start_animation = null
+jump_animation = null
+jump_land_animation = null
+run_threshold = null
 
 [editable path="Player/AnimationPlayer"]
