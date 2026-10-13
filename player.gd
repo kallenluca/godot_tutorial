@@ -39,7 +39,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if Input.is_action_pressed("run"):
 		current_speed = run_speed
-
+	else:
+		current_speed = walk_speed
+		
 func _physics_process(delta: float) -> void:
 	# Read WASD input.
 	var input_dir := Input.get_vector(
@@ -49,6 +51,7 @@ func _physics_process(delta: float) -> void:
 		"move_back"
 	)
 
+	
 	# Get the camera's horizontal forward and right directions.
 	var forward := -camera_pivot.global_basis.z
 	var right := camera_pivot.global_basis.x

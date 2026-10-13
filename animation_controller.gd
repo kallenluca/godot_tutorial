@@ -9,7 +9,9 @@ extends Node3D
 @export var jump_start_animation: StringName = &"Jump_Start"
 @export var jump_animation: StringName = &"Jump"
 @export var jump_land_animation: StringName = &"Jump_Land"
-@export var run_threshold: float = 4
+@export var run_threshold: float = 6.5
+@export var walk_speed: float = 5.0
+@export var run_speed: float = 8.0
 
 var current_animation: StringName = &""
 var jump_state: StringName = &""
@@ -24,15 +26,15 @@ func _ready() -> void:
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(delta: float) -> void:			
 	if character == null or animation_player == null:
 		return
 	var on_floor := character.is_on_floor()
 	var speed := Vector2(
 		character.velocity.x,
 		character.velocity.z
-	).length()
-	
+	).length()	
+		
 	var velocity := character.velocity
 	var horizontal_speed := Vector2(
 		velocity.x,velocity.z
@@ -45,6 +47,8 @@ func _process(delta: float) -> void:
 		jump_state = &"start"
 		play_animation(jump_start_animation)
 
+	var moving := Input.is_key_pressed(KEY_W);
+	var runing := Input.is_key_pressed(KEY_SHIFT);
 	# Handle airborne animation.
 	if not on_floor:
 		if jump_state == &"":
@@ -64,11 +68,15 @@ func _process(delta: float) -> void:
 	elif jump_state == &"":
 		if speed < 0.1:
 			play_animation(idle_animation)
-		elif speed >= run_threshold:
-			play_animation(run_animation)
+		elif moving:
+			if runing:
+				if current_animation !=  run_animation:
+					play_animation(run_animation)
+			else:
+				if current_animation !=walk_animation:
+					play_animation(walk_animation)
 		else:
 			play_animation(walk_animation)
-
 	was_on_floor = on_floor
 
 
@@ -101,6 +109,23 @@ func _on_animation_finished(animation_name: StringName) -> void:
 			current_animation = &""
 			play_animation(jump_animation)
 
-	elif animation_name == jump_animation:
+	elif animation_name == jump_land_animation:
 		jump_state = &""
-		current_animation = &"Idle"
+		current_animation = &""
+		resume_ground_animation()
+		
+func resume_ground_animation() -> void:
+	if character == null:
+		return
+
+	var speed := Vector2(
+		character.velocity.x,
+		character.velocity.z
+	).length()
+
+	if speed < 0.1:
+		play_animation(idle_animation)
+	elif speed >= run_threshold:
+		play_animation(run_animation)
+	else:
+		play_animation(walk_animation)
