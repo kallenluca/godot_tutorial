@@ -101,6 +101,6 @@ func _on_animation_finished(animation_name: StringName) -> void:
 			current_animation = &""
 			play_animation(jump_animation)
 
-	elif animation_name == jump_animation:
+	elif animation_name == jump_land_animation:
 		jump_state = &""
-		current_animation = &"Idle"
+		current_animation = &""
