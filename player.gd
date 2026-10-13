@@ -1,80 +1,93 @@
 extends CharacterBody3D
 
-
-const SPEED = 5.0
-const JUMP_VELOCITY = 4.5
-
-@export var move_speed: float = 5.0
+@export var walk_speed: float = 5.0
+@export var run_speed: float = 8.0
 @export var gravity: float = 20.0
-@export var mouse_sensitiveity: float = 0.003
-@export var min_camera_angle: float = -60
-@export var max_camera_angle: float = 30
+@export var jump_velocity: float = 7.0
+@export var mouse_sensitivity: float = 0.003
+@export var min_camera_angle: float = -60.0
+@export var max_camera_angle: float = 30.0
+@export var turn_speed: float = 5.0
 
 @onready var camera_pivot: Node3D = $CameraPivot
-@onready var camera: Camera3D  = $CameraPivot/MainCamera
+@onready var camera: Camera3D = $CameraPivot/MainCamera
+@onready var body_mesh: MeshInstance3D = $BodyMesh
+@onready var visual_pivot = $VisualPivot
+@onready var anim_player = $AnimationPlayer
 
-var camera_pitch: float = 0
+var camera_pitch: float = 0.0
+var current_speed = walk_speed
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED	
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
-		camera_pivot.rotate_y(-event.relative.x * mouse_sensitiveity)
-		camera_pitch -= event.relative.y * mouse_sensitiveity
-	camera_pitch = clamp(
+		camera_pivot.rotate_y(
+			-event.relative.x * mouse_sensitivity
+		)
+		
+		camera_pitch -= event.relative.y * mouse_sensitivity
+		camera_pitch = clamp(
 			camera_pitch,
 			deg_to_rad(min_camera_angle),
 			deg_to_rad(max_camera_angle)
 		)
-
-	camera.rotation.x = camera_pitch
+		camera.rotation.x = camera_pitch
 
 	if event.is_action_pressed("ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	if Input.is_action_pressed("run"):
+		current_speed = run_speed
 
 func _physics_process(delta: float) -> void:
+	# Read WASD input.
 	var input_dir := Input.get_vector(
 		"move_left",
 		"move_right",
 		"move_forward",
 		"move_back"
-		)
-	
+	)
+
+	# Get the camera's horizontal forward and right directions.
 	var forward := -camera_pivot.global_basis.z
 	var right := camera_pivot.global_basis.x
 
-#	keep movement in the ground, ignoring camera up/down title.
 	forward.y = 0.0
 	right.y = 0.0
+
 	forward = forward.normalized()
 	right = right.normalized()
-	
-	var direction := right * input_dir.x + forward * -input_dir.y
+
+	# Convert input into camera-relative movement.
+	var direction := right * input_dir.x - forward * input_dir.y
 	direction = direction.normalized()
-	velocity.x = direction.x * move_speed
-	velocity.z = direction.z * move_speed
-		
-	
-	# Add the gravity.
+
+	# Set horizontal movement.
+	velocity.x = direction.x * current_speed
+	velocity.z = direction.z * current_speed
+
+	# Turn smoothly toward the direction of movement.
+	if direction.length() > 0.01:
+		var target_angle: float = atan2(
+			-forward.x,
+			-forward.z
+		)
+
+		anim_player.rotation.y = lerp_angle(
+			anim_player.rotation.y,
+			target_angle+135,
+			min(turn_speed * delta, 1.0)
+		)
+
+	# Apply gravity.
 	if not is_on_floor():
-		velocity += get_gravity() * delta
-
-	# Handle jump.
-	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
-		velocity.y = JUMP_VELOCITY
-
-	# Get the input direction and handle the movement/deceleration.
-	# As good practice, you should replace UI actions with custom gameplay actions.
-	
-	#var input_dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	#var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	
-	if direction:
-		velocity.x = direction.x * SPEED
-		velocity.z = direction.z * SPEED
+		velocity.y -= gravity * delta
 	else:
-		velocity.x = move_toward(velocity.x, 0, SPEED)
-		velocity.z = move_toward(velocity.z, 0, SPEED)
+		if Input.is_action_just_pressed("jump"):
+			velocity.y = jump_velocity
+		else:
+			velocity.y = 0.0
 
+	# Move the character and handle collisions.
 	move_and_slide()
