@@ -16,6 +16,7 @@ extends Node3D
 var current_animation: StringName = &""
 var jump_state: StringName = &""
 var was_on_floor: bool = true
+var is_landing: bool = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -26,7 +27,9 @@ func _ready() -> void:
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:			
+func _process(delta: float) -> void:
+	
+	
 	if character == null or animation_player == null:
 		return
 	var on_floor := character.is_on_floor()
@@ -49,6 +52,19 @@ func _process(delta: float) -> void:
 
 	var moving := Input.is_key_pressed(KEY_W);
 	var runing := Input.is_key_pressed(KEY_SHIFT);
+	
+	var just_landed = on_floor and not was_on_floor
+	if is_landing:
+		velocity.x = 0.0
+		velocity.z = 0.0
+	if just_landed:
+		is_landing = true
+		play_animation(jump_land_animation)
+		
+	was_on_floor = on_floor
+	
+	if is_landing:
+		return
 	# Handle airborne animation.
 	if not on_floor:
 		if jump_state == &"":
@@ -60,10 +76,10 @@ func _process(delta: float) -> void:
 			play_animation(jump_animation)
 
 	# Detect landing.
-	elif not was_on_floor and jump_state != &"land":
+	elif not on_floor and jump_state != &"land":
 		jump_state = &"land"
 		play_animation(jump_land_animation)
-
+	
 	# Normal ground movement.
 	elif jump_state == &"":
 		if speed < 0.1:
@@ -77,8 +93,6 @@ func _process(delta: float) -> void:
 					play_animation(walk_animation)
 		else:
 			play_animation(walk_animation)
-	was_on_floor = on_floor
-
 
 func play_animation(animation_name: StringName) -> void:
 	if current_animation == animation_name:
@@ -112,6 +126,7 @@ func _on_animation_finished(animation_name: StringName) -> void:
 	elif animation_name == jump_land_animation:
 		jump_state = &""
 		current_animation = &""
+		is_landing = false
 		resume_ground_animation()
 		
 func resume_ground_animation() -> void:

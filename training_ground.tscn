@@ -5,10 +5,10 @@
 [ext_resource type="Script" uid="uid://c310fxhq8tvj7" path="res://animation_controller.gd" id="3_lvhi1"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_owv24"]
-size = Vector3(20, 0.5, 20)
+size = Vector3(200, 0.5, 200)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_owv24"]
-size = Vector3(20, 0.5, 20)
+size = Vector3(200, 0.5, 200)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nx0hy"]
 vertex_color_use_as_albedo = true
@@ -29,6 +29,69 @@ albedo_color = Color(1, 0.29748532, 0.11207495, 1)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_owv24"]
 
+[sub_resource type="Gradient" id="Gradient_lvhi1"]
+offsets = PackedFloat32Array(0.2, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_7t3th"]
+noise_type = 2
+frequency = 0.03
+cellular_jitter = 3.0
+cellular_return_type = 0
+domain_warp_enabled = true
+domain_warp_type = 1
+domain_warp_amplitude = 50.0
+domain_warp_fractal_type = 2
+domain_warp_fractal_lacunarity = 1.5
+domain_warp_fractal_gain = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_q3euq"]
+noise = SubResource("FastNoiseLite_7t3th")
+color_ramp = SubResource("Gradient_lvhi1")
+seamless = true
+
+[sub_resource type="Terrain3DMaterial" id="Terrain3DMaterial_owv24"]
+_shader_parameters = {
+&"bias_distance": null,
+&"blend_sharpness": null,
+&"depth_blur": null,
+&"enable_macro_variation": null,
+&"enable_projection": null,
+&"flat_terrain_normals": null,
+&"macro_variation1": null,
+&"macro_variation2": null,
+&"macro_variation_slope": null,
+&"mipmap_bias": null,
+&"noise1_angle": null,
+&"noise1_offset": null,
+&"noise1_scale": null,
+&"noise2_scale": null,
+&"noise_texture": SubResource("NoiseTexture2D_q3euq"),
+&"projection_threshold": null
+}
+show_checkered = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lv2yr"]
+transparency = 4
+cull_mode = 2
+vertex_color_use_as_albedo = true
+backlight_enabled = true
+backlight = Color(0.5, 0.5, 0.5, 1)
+distance_fade_mode = 1
+distance_fade_min_distance = 128.0
+distance_fade_max_distance = 96.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_5sjcd"]
+generated_type = 1
+height_offset = 0.5
+material_override = SubResource("StandardMaterial3D_lv2yr")
+last_lod = 0
+last_shadow_lod = 0
+lod0_range = 128.0
+
+[sub_resource type="Terrain3DAssets" id="Terrain3DAssets_211fk"]
+mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_5sjcd")])
+
 [node name="TrainingGround" type="Node3D" unique_id=922134510]
 top_level = true
 
@@ -38,6 +101,7 @@ lod_bias = 0.001
 mesh = SubResource("BoxMesh_owv24")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Ground" unique_id=570738625]
+disable_mode = 1
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground/StaticBody3D" unique_id=1344283241]
 shape = SubResource("BoxShape3D_owv24")
@@ -133,5 +197,15 @@ bones/52/rotation = Quaternion(-0.00013717555, 0.9643068, -0.26478708, -0.000499
 script = ExtResource("3_lvhi1")
 character = NodePath("..")
 animation_player = NodePath("../AnimationPlayer/AnimationPlayer")
+
+[node name="Terrain3D" type="Terrain3D" parent="." unique_id=1562878709]
+data_directory = "res://addons/terrain_3d"
+material = SubResource("Terrain3DMaterial_owv24")
+assets = SubResource("Terrain3DAssets_211fk")
+label_distance = 6855.5
+collision_layer = 255
+show_checkered = true
+top_level = true
+metadata/_edit_lock_ = true
 
 [editable path="Player/AnimationPlayer"]
