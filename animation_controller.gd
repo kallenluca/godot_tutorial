@@ -29,7 +29,6 @@ func _ready() -> void:
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	
-	
 	if character == null or animation_player == null:
 		return
 	var on_floor := character.is_on_floor()
@@ -37,11 +36,8 @@ func _process(delta: float) -> void:
 		character.velocity.x,
 		character.velocity.z
 	).length()	
-		
-	var velocity := character.velocity
-	var horizontal_speed := Vector2(
-		velocity.x,velocity.z
-	).length()
+
+	
 	
 	var next_animation: StringName
 	
@@ -50,15 +46,20 @@ func _process(delta: float) -> void:
 		jump_state = &"start"
 		play_animation(jump_start_animation)
 
-	var moving := Input.is_key_pressed(KEY_W);
-	var runing := Input.is_key_pressed(KEY_SHIFT);
+	var moving_forward := Input.is_key_pressed(KEY_W);
+	var moving_left := Input.is_key_pressed(KEY_A);
+	var moving_back := Input.is_key_pressed(KEY_S);
+	var moving_right := Input.is_key_pressed(KEY_D);
+	var running := Input.is_key_pressed(KEY_SHIFT);
 	
-	var just_landed = on_floor and not was_on_floor
-	if is_landing:
-		velocity.x = 0.0
-		velocity.z = 0.0
+	var just_landed := on_floor and not was_on_floor
+	
 	if just_landed:
 		is_landing = true
+		jump_state = &"land"
+
+		if character != null and character.has_method("lock_for_landing"):
+			character.lock_for_landing()
 		play_animation(jump_land_animation)
 		
 	was_on_floor = on_floor
@@ -76,16 +77,14 @@ func _process(delta: float) -> void:
 			play_animation(jump_animation)
 
 	# Detect landing.
-	elif not on_floor and jump_state != &"land":
-		jump_state = &"land"
-		play_animation(jump_land_animation)
+	
 	
 	# Normal ground movement.
 	elif jump_state == &"":
 		if speed < 0.1:
 			play_animation(idle_animation)
-		elif moving:
-			if runing:
+		elif moving_forward or moving_back or moving_left or moving_right:
+			if running:
 				if current_animation !=  run_animation:
 					play_animation(run_animation)
 			else:
@@ -127,6 +126,10 @@ func _on_animation_finished(animation_name: StringName) -> void:
 		jump_state = &""
 		current_animation = &""
 		is_landing = false
+		
+		if character != null:
+			character.unlock_after_landing()
+		
 		resume_ground_animation()
 		
 func resume_ground_animation() -> void:
